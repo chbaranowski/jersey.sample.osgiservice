@@ -71,17 +71,24 @@ public class Activator implements BundleActivator {
         }
     }
 
-    private void rawRegisterServlets() throws ServletException, NamespaceException, InterruptedException {
-        logger.info("JERSEY BUNDLE: REGISTERING SERVLETS");
-        logger.info("JERSEY BUNDLE: HTTP SERVICE = " + httpService.toString());
+   private void rawRegisterServlets() throws ServletException,
+	    NamespaceException, InterruptedException {
+	logger.info("JERSEY BUNDLE: REGISTERING SERVLETS");
+	logger.info("JERSEY BUNDLE: HTTP SERVICE = " + httpService.toString());
 
-        BundleProxyClassLoader bundleProxyClassLoader = new BundleProxyClassLoader(bc.getBundle());
+	BundleProxyClassLoader bundleProxyClassLoader = new BundleProxyClassLoader(
+		bc.getBundle());
 	ClassLoader original = Thread.currentThread().getContextClassLoader();
 	Thread.currentThread().setContextClassLoader(bundleProxyClassLoader);
-        httpService.registerServlet("/jersey-http-service", new ServletContainer(), getJerseyServletParams(), null);
-        Thread.currentThread().setContextClassLoader(original);
-        sendAdminEvent();
-        logger.info("JERSEY BUNDLE: SERVLETS REGISTERED");
+	try {
+	    httpService.registerServlet("/jersey-http-service",
+		    new ServletContainer(), getJerseyServletParams(), null);
+	} finally {
+	    Thread.currentThread().setContextClassLoader(original);
+	}
+
+	sendAdminEvent();
+	logger.info("JERSEY BUNDLE: SERVLETS REGISTERED");
     }
 
     private void sendAdminEvent() {
